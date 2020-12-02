@@ -13,7 +13,7 @@ def find_pair(numbers):
 
 
 def main():
-    """ get input, time and call findPair and print results"""
+    """ fetch input, time and call find_pair and print results"""
     # Read Input
     with open('./in.txt', 'r', encoding='utf-8') as file:
         numbers = list(map(int, file.readlines()))
