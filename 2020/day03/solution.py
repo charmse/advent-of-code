@@ -21,12 +21,12 @@ def find_hit_trees(right, down, lines):
 
 
 def main():
-    """ fetch inappend, time and call both parts and print results"""
+    """ fetch input, time and call both parts and print results"""
 
-    # Read Inappend
+    # Read Input
     with open('./in.txt', 'r', encoding='utf-8') as file:
         lines = list(map(str.strip, file.readlines()))
-    print('Inappend:\n')
+    print('Input:\n')
     for l in lines:
         print(l)
 
