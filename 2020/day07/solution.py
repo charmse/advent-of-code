@@ -1,9 +1,8 @@
 """ Day 7: Handy Haversacks """
 
-import functools
-import time
-
+# Part 1 Helpers
 def get_bag_set(line):
+    """ Tuple of bag and contents """
     line = line[:-1]
     (bag, set_) = line.split('contain')
     get_name = lambda x, i, j: x.split()[i] + x.split()[j]
@@ -12,51 +11,61 @@ def get_bag_set(line):
     inside_ = set(map(lambda x: get_name(x, 1, 2), inside))
     return (bag, inside_)
 
-def fix_name(name):
-    if name[-1] == 's':
-        return name[:-1]
-    else:
-        return name
-
-def fix_number(number):
-    if number == 'no':
-        return 1
-    else:
-        return number
-
-def get_bag_set_with_number(line):
-    line = line[:-1]
-    (bag, set_) = line.split('contain')
-    get_name = lambda x, i, j: x.split()[i] + x.split()[j]
-    bag = get_name(bag, 0, 1)
-    inside = list(map(str.strip, set_.split(',')))
-    inside_ = set(map(lambda x: (fix_number(x.split()[0]), fix_name(get_name(x, 1, 2))), inside))
-    return (bag, inside_)
-
-def find_bag(item, bag_sets_with_number):
-    for (bag, set_) in bag_sets_with_number:
-        if item == bag:
-            return (bag, set_)
-    return ()
 
 def get_bag(name, bag_set):
+    """ Get bag and its contents in list of bags """
     for bag in bag_set:
         if bag[0] == name:
             return bag
     return ()
 
 
+# Part 2 Helpers
+def fix_name(name):
+    """ Remove plural ending """
+    if name[-1] == 's':
+        return name[:-1]
+    else:
+        return name
+
+
+def fix_number(number):
+    """ Convert number to int or return 1 in no """
+    if number == 'no':
+        return 0
+    else:
+        return int(number)
+
+
+def get_bag_set_with_number(line):
+    """ Get tuple of bag and contents with number """
+    (bag, set_) = line[:-1].split('contain')
+    bag = bag.split()[0] + bag.split()[1]
+    inside = list(map(str.strip, set_.split(',')))
+    inside_ = set(map(lambda x: (fix_number(x.split()[0]), fix_name(x.split()[1] + x.split()[2])), inside))
+    return (bag, inside_)
+
+
+def get_bag_(item, bag_sets_with_number):
+    """ Get bag and its contents in list of bags """
+    for (bag, set_) in bag_sets_with_number:
+        if item == bag:
+            return (bag, set_)
+    return ()
+
+
 def calculate(item, bag_set):
+    """ Calculate the number of bags in target bag """
     if item[1] == 'otherbag':
-        return 1
+        return 0
     sum = 0
     bag = get_bag(item[1], bag_set)
     for b in bag[1]:
-        print(b[0])
-        print(calculate(b, bag_set))
         sum += (b[0] * calculate(b, bag_set))
-    return sum
+    return sum + 1
 
+
+# Main
 def main():
     """ fetch input, perform both parts, and print results"""
 
@@ -66,15 +75,9 @@ def main():
         bag_sets = list(map(get_bag_set, lines))
         bag_sets_with_number = list(map(get_bag_set_with_number, lines))
 
-    print('Input:\n')
-    for b in bag_sets:
-        print(f'{b}')
-    print('\nFinding solutions...\n')
+    target = 'shinygold'
 
     ## Part 1
-    begin = time.time()
-
-    target = 'shinygold'
     contain_target = set()
     old_lenth = -1
     while old_lenth != len(contain_target):
@@ -83,49 +86,29 @@ def main():
             if target in set_ or len(set_.intersection(contain_target)) != 0:
                 contain_target.add(bag)
 
-    time.sleep(1)
-    time_taken = time.time() - begin
+    # Print solution
+    print(len(contain_target))
 
-    # Print results and solution
-    print(f'Part 1: {len(contain_target)}')
-    print(f'Time took: {time_taken}\n')
 
     ## Part 2
-    begin = time.time()
-
-    # Get shinygold bag tuple
-    gold_bag = []
-    for item in bag_sets_with_number:
-        bag = item[0]
-        set_ = item[1]
-        if bag == target:
-            gold_bag.append(item)
-            bag_sets_with_number.remove(item)
-            break
-
-
     # Get tree of bags
-    old_bag = []
-    while len(old_bag) != len(gold_bag):
-        old_bag = gold_bag
-        for (bag, items) in gold_bag:
-            for (n, item) in items:
+    target_list = [get_bag_(target, bag_sets_with_number)]
+    old_list = []
+    while len(old_list) != len(target_list):
+        old_list = target_list
+        for (bag, items) in target_list:
+            for _, item in items:
                 if item != 'otherbag':
-                    gold_bag.append(find_bag(item, bag_sets_with_number))
+                    target_list.append(get_bag_(item, bag_sets_with_number))
 
-    for bag in gold_bag:
-       print(bag)
+    # Get unique bags
+    bag_list = []
+    for bag in target_list:
+        if bag not in bag_list:
+            bag_list.append(bag)
 
     # Calculate solution
-    solution = calculate((1, target), gold_bag)
-
-    time.sleep(1)
-    time_taken = time.time() - begin
-
-    # Print results and solution
-    print(f'Part 2: {solution}')
-    print(f'Time took: {time_taken}\n')
+    print(calculate((1, target), bag_list) -1)
 
 if __name__ == "__main__":
     main()
-
