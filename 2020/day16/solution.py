@@ -1,7 +1,7 @@
 """ Day 16: Ticket Translation """
 
 from itertools import permutations
-import math
+import numpy as np
 
 
 def p1(fields, tickets):
@@ -14,41 +14,39 @@ def p1(fields, tickets):
                 error.append(t)
     return error
 
-def remove_similar(fields, perms, valid):
-    new_perms = []
-    print(valid)
-    for perm in perms:
-        add = True
-        for f, p, v in zip(fields, perm, valid):
-            if f == p and not v:
-                add = False
-                break
-        print(add)
-        if add:
-            new_perms.append(perms)
-    return new_perms
+
+def print_dict(d):
+    cols = list(map(list, zip(*list(d.values()))))
+    print(f'\t'.expandtabs(20), end='')
+    for c in cols:
+        print(sum(c), end=' ')
+    print(f'\t\n'.expandtabs(20))
+    for k in d.keys():
+         print(f'{k}:\t'.expandtabs(20), end='')
+         print(*d[k], end='\t\t')
+         print(sum(d[k]))
+
 
 def p2(fields, tickets):
     bad = p1(fields, tickets[1:])
     ts = list(filter(lambda t: not(any(b in t for b in bad)), tickets[1:]))
+    tts = list(map(list, zip(*ts)))
     names = [n for n, vs in fields]
     vals = [vs for n, vs in fields]
-    perms = permutations(vals)
-    while True:
-        for fs in perms:
-            all_t = True
-            for vs in ts:
-                valid = [f[0] <= v <= f[1] or f[2] <= v <= f[3] for f, v in zip(fs, vs)]
-                if not all(valid):
-                    all_t = False
+    d = dict()
+    for n, v in zip(names, vals):
+        valid = []
+        for c in tts:
+            f = 1
+            for r in c:
+                if not v[0] <= r <= v[1] and not v[2] <= r <= v[3]:
+                    f = 0
                     break
-            if all_t:
-                order = [names[vals.index(o)] for o in fs]
-                return math.prod([tickets[0][i] if order[i].startswith('depature') else 1 for i in range(len(order))])
-            else:
-                perms = remove_similar(fs, perms, valid)
-                print(perms)
-                break
+            valid.append(f)
+        d[n] = valid
+    print_dict(d)
+    return 1
+
 
 
 def parse(l):
